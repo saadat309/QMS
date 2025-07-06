@@ -1,0 +1,20 @@
+[
+  {
+    "agent": "saadat",
+    "query": "dghrdsgh",
+    "phone": "03",
+    "additionalInfo": "",
+    "date": "2024-08-31",
+    "time": "12:09:16 PM",
+    "id": 90
+  },
+  {
+    "id": 90,
+    "agent": "aamir",
+    "query": "dghrdsgh",
+    "phone": "03",
+    "additionalInfo": "",
+    "date": "2024-08-31",
+    "time": "12:10:45 PM"
+  }
+]

@@ -1,0 +1,93 @@
+body {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 1.5vw;
+    }
+
+    .container {
+        margin: 3rem auto;
+        width: 90%;
+        padding: 1rem;
+        background-color: rgb(234, 248, 201);
+        border-radius: 20px;
+        box-shadow: 0 8px 16px rgb(0, 0, 0, 0.5);
+    }
+
+    .form-container {
+        margin: 2rem auto;
+        width: 50%;
+        margin-bottom: 4rem;
+    }
+
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .form-control {
+        font-size: 1.2vw;
+    }
+
+    textarea.form-control {
+        height: 100px;
+    }
+
+    .btn {
+        font-size: 1.2vw;
+        margin: 0.5rem;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+        font-size: 1.2vw;
+    }
+
+    thead th {
+        font-size: 1.2vw;
+    }
+
+    tbody td {
+        vertical-align: middle;
+    }
+
+    .mt-2 {
+        margin-top: 1rem;
+    }
+
+    .mt-4 {
+        margin-top: 2rem;
+    }
+
+    table td {
+        word-wrap: break-word;
+        /* Ensure text wraps */
+        overflow-wrap: break-word;
+        /* Ensure text wraps */
+        max-width: 200px;
+        /* Set max width to prevent overflow */
+    }
+
+    .table-body-wrapper {
+        max-height: 800px;
+        /* Adjust the height as needed */
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background: #f8f9fa;
+        /* Same as table background */
+        z-index: 1;
+        /* Ensure header is above body */
+    }
