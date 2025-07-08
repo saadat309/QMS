@@ -1,0 +1,255 @@
+/* Layout */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: inherit;
+  padding: 3rem 2rem;
+}
+
+/* Form Box */
+.form-box {
+  background: lightgreen;
+  border-radius: 15px;
+  box-shadow: 5px;
+  padding: 2rem 3rem;
+  width: 100%;
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-title {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: black;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-size: 1rem;
+  color: black;
+  margin-bottom: 0.2rem;
+  font-weight: 500;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  padding: 1.2rem 1rem;
+  border-radius: 15px;
+  border: 1px solid black;
+  background: inherit;
+  color: black;
+  font-size: 1rem;
+  transition: border;
+  outline: none;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus {
+  border-color: blueviolet;
+  background: whitesmoke;
+}
+
+.password-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.password-input-wrapper input[type="password"],
+.password-input-wrapper input[type="text"] {
+  flex: 1;
+}
+
+#togglePassword {
+  background: none;
+  border: none;
+  color: gray;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 0.5rem;
+  padding: 0;
+  transition: color;
+}
+
+#togglePassword:focus {
+  color: black;
+  outline: none;
+}
+
+/* Status Messages */
+
+.form-status {
+  margin-top: 1rem;
+  font-size: 0.5rem;
+  text-align: center;
+  min-height: 2rem;
+  color: blueviolet;
+}
+
+/* Submit Button */
+#submitBtn {
+  margin-top: 2rem;
+  padding: 0.75rem;
+  background: lightskyblue;
+  color: black;
+  border: 2px solid black;
+  border-bottom: 5px solid black;
+  border-radius: 15px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 2px 8px 4px black;
+}
+
+#submitBtn:hover,
+#submitBtn:focus {
+  background: green;
+  transform: scale(1.2);
+  outline: none;
+}
+
+/* Forgot Password Link */
+.forgot-link {
+  display: block;
+  margin: 1rem auto 0 auto;
+  text-align: center;
+  color: blue;
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+
+.forgot-link:hover,
+.forgot-link:focus {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .form-box {
+    padding: 3rem 2rem;
+    max-width: 100%;
+  }
+  .login-wrapper {
+    padding: 2rem 3rem;
+  }
+  .form-title {
+    font-size: 1.2rem;
+  }
+}
+
+/* =======================
+   Custom Modal (Alert/Confirm) - Interactive & Responsive
+=========================== */
+.modal {
+  display: none; /* default */
+  position: fixed;
+  z-index: 100000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(16, 24, 40, 0.65);
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.modal-content {
+  background: whitesmoke;
+  color: black;
+  border: 2px solid black;
+  border-radius: 15px;
+  padding: 3rem 4rem;
+  min-width: 260px;
+  max-width: 90vw;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 8px 32px 0 rgba(59, 130, 246, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  animation: fadeIn 0.3s;
+}
+
+#modalMessage {
+  font-size: 1rem;
+  color: black;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+#modalButtons {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  width: 100%;
+}
+
+#modalButtons button {
+  padding: 1rem 2rem;
+  border-radius: 15px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: yellow;
+  color: black;
+  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+  width: fit-content;
+  align-self: center;
+}
+#modalButtons button:hover {
+  background: green;
+  transform: scale(1.07);
+}
+#modalButtons button:last-child:hover {
+  background: red;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 2rem 1rem;
+    min-width: 0;
+    max-width: 70vw;
+    border-radius: 15px;
+  }
+  #modalMessage {
+    font-size: 0.75rem;
+  }
+  #modalButtons button {
+    font-size: 0.75rem;
+    padding: 1rem 1rem;
+  }
+  #modalButtons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login To QMS</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="login.css" />
+
+  </head>
+  <body>
+    <main class="login-wrapper">
+      <form id="loginForm" class="form-box" method="post" aria-labelledby="loginTitle" novalidate>
+        <h2 class="form-title" id="loginTitle">Login</h2>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Email"
+            required
+            aria-describedby="emailError"
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Password"
+              required
+              aria-describedby="passwordError"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              id="togglePassword"
+              aria-label="Show password"
+              tabindex="0"
+            >
+              <i id="eyeIcon" class="fa-regular fa-eye-slash" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn">Login</button>
+
+        <div id="form-status" class="form-status" role="status" aria-live="polite"></div>
+        <a href="./forgot_password.html" class="forgot-link">Forgot Password?</a>
+      </form>
+    </main>
+    
+    <!-- Custom Modal -->
+      <div id="customModal" class="modal" style="display: none">
+        <div class="modal-content">
+          <span id="modalMessage"></span>
+          <div id="modalButtons"></div>
+        </div>
+      </div>
+    <script type="module" src="login.js"></script>
+  </body>
+</html>
