@@ -1,5 +1,16 @@
+import {
+  showModal,
+  handleError,
+  fetchAgents,
+  fetchQueries,
+  saveAgent,
+  removeAgent,
+} from "./utils.js";
+
 const admin = JSON.parse(sessionStorage.getItem("admin"));
-console.log(admin.id, admin.email);
+let agentsList = [];
+let queries = [];
+let editId = null;
 
 if (!admin) {
   // Not logged in — kick back to login page
@@ -7,7 +18,165 @@ if (!admin) {
 } else {
   // ✅ Preload dashboard
   document.getElementById("welcome").textContent = `Welcome, ${admin.email}`;
-  // You can also fetch other things based on admin.id
+
+  loadAgents();
+
+  const queriesData = await fetchQueries();
+  queries = queriesData.queries;
+
+  displayQueries(queries);
+}
+
+// Query handling
+
+function displayQueries(queries) {
+  const tableBody = document.querySelector("#queryTable tbody");
+  tableBody.innerHTML = "";
+
+  queries.forEach((query, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+                <th scope="row">${index + 1}</th>
+                <td>${query.agent_name}</td>
+                <td>${query.query_text}</td>
+                <td>${query.phone || ""}</td>
+                <td>${query.additional_info || ""}</td>
+                <td>${query.query_date || ""}</td>
+                <td>${query.query_time}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm edit-btn" data-id="${
+                      query.id
+                    }">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-btn" data-id="${
+                      query.id
+                    }">Delete</button>
+                </td>
+            `;
+    tableBody.appendChild(row);
+  });
+
+  // if (editId === null) {
+  //   scrollToElement(document.getElementById("queryTable"));
+  // }
+
+  // Attach event listeners to new buttons
+
+  // document.querySelectorAll(".edit-btn").forEach((btn) => {
+  //   btn.addEventListener("click", editQueryHandler);
+  // });
+  // document.querySelectorAll(".delete-btn").forEach((btn) => {
+  //   btn.addEventListener("click", deleteQueryHandler);
+  // });
+}
+
+// Agents Handling
+
+async function loadAgents() {
+  const agentsData = await fetchAgents(admin.id);
+  agentsList = agentsData.agents;
+
+  const agents = agentsList.map((agent) => agent.name);
+  console.log(agents);
+  const filterAgent = document.getElementById("filterAgent");
+  const agentSelect = document.getElementById("agent");
+  const removeAgentSelect = document.getElementById("removeAgentSelect");
+
+  clearSelect(filterAgent);
+  clearSelect(agentSelect);
+  clearSelect(removeAgentSelect);
+
+  addOption(filterAgent, "All", "All");
+  addOption(agentSelect, "Choose...", "", true);
+  addOption(removeAgentSelect, "Choose...", "", true);
+
+  agents.forEach((agent) => {
+    addOption(filterAgent, agent, agent);
+    addOption(agentSelect, agent, agent);
+    addOption(removeAgentSelect, agent, agent);
+  });
+}
+
+function clearSelect(selectElement) {
+  while (selectElement.options.length > 0) {
+    selectElement.remove(0);
+  }
+}
+
+function addOption(selectElement, text, value, selected = false) {
+  const option = document.createElement("option");
+  option.text = text;
+  option.value = value;
+  option.selected = selected;
+  selectElement.appendChild(option);
+}
+
+// Agent management handlers
+document.getElementById("addAgent").addEventListener("click", addAgentHandler);
+document
+  .getElementById("removeAgent")
+  .addEventListener("click", removeAgentHandler);
+
+async function addAgentHandler() {
+  const agentName = document.getElementById("newAgent").value;
+  if (agentName) {
+    try {
+      await saveAgent(agentName, admin.id);
+      document.getElementById("newAgent").value = "";
+      loadAgents();
+    } catch (err) {
+      console.error("Failed to add agent:", err);
+      alert("Something went wrong while adding agent.");
+    }
+  }
+}
+
+async function removeAgentHandler() {
+  const agentName = document.getElementById("removeAgentSelect").value;
+  if (agentName && agentName !== "Choose...") {
+    try {
+      await removeAgent(agentName, admin.id);
+      loadAgents();
+    } catch (err) {
+      console.error("Failed to remove agent:", err);
+      alert("Something went wrong while removing agent.");
+    }
+  }
+}
+
+// filters Management
+
+document.getElementById("applyFilters").addEventListener("click", applyFilters);
+document.getElementById("clearFilters").addEventListener("click", clearFilters);
+
+function applyFilters() {
+  const agent = document.getElementById("filterAgent").value;
+  const startDate = document.getElementById("filterStartDate").value;
+  const endDate = document.getElementById("filterEndDate").value;
+
+  let filteredQueries = queries;
+
+  if (agent && agent !== "All") {
+    filteredQueries = filteredQueries.filter((q) => q.agent === agent);
+  }
+  if (startDate) {
+    filteredQueries = filteredQueries.filter(
+      (q) => new Date(q.date) >= new Date(startDate)
+    );
+  }
+  if (endDate) {
+    filteredQueries = filteredQueries.filter(
+      (q) => new Date(q.date) <= new Date(endDate)
+    );
+  }
+
+  displayQueries(filteredQueries);
+}
+
+function clearFilters() {
+  document.getElementById("filterAgent").value = "All";
+  document.getElementById("filterStartDate").value = "";
+  document.getElementById("filterEndDate").value = "";
+  displayQueries(queries);
 }
 
 // document.addEventListener("DOMContentLoaded", function () {
@@ -16,171 +185,12 @@ if (!admin) {
 //   let editId = null;
 //   const scrollPositionKey = "scrollPosition";
 
-//   // Open IndexedDB database
-//   const request = indexedDB.open("QueriesDB", 1);
-
-//   request.onupgradeneeded = function (event) {
-//     db = event.target.result;
-//     if (!db.objectStoreNames.contains("queries")) {
-//       const objectStore = db.createObjectStore("queries", {
-//         keyPath: "id",
-//         autoIncrement: true,
-//       });
-//       objectStore.createIndex("agent", "agent", { unique: false });
-//       objectStore.createIndex("query", "query", { unique: false });
-//       objectStore.createIndex("phone", "phone", { unique: false });
-//       objectStore.createIndex("additionalInfo", "additionalInfo", {
-//         unique: false,
-//       });
-//       objectStore.createIndex("date", "date", { unique: false });
-//       objectStore.createIndex("time", "time", { unique: false });
-//     }
-//   };
-
 //   request.onsuccess = function (event) {
 //     db = event.target.result;
 //     loadQueries();
 //     loadAgents();
 //     restoreScrollPosition();
 //   };
-
-//   request.onerror = function (event) {
-//     console.error("Error opening IndexedDB:", event.target.errorCode);
-//     alert("Error opening IndexedDB: " + event.target.errorCode);
-//   };
-
-//   // Export to JSON
-//   document
-//     .getElementById("exportBackup")
-//     .addEventListener("click", exportDataToJSON);
-
-//   function exportDataToJSON() {
-//     if (!db) {
-//       alert("Database not initialized.");
-//       return;
-//     }
-
-//     const transaction = db.transaction("queries", "readonly");
-//     const objectStore = transaction.objectStore("queries");
-//     const request = objectStore.getAll();
-
-//     request.onsuccess = function () {
-//       const data = request.result;
-//       const blob = new Blob([JSON.stringify(data, null, 2)], {
-//         type: "application/json",
-//       });
-//       const url = URL.createObjectURL(blob);
-//       const a = document.createElement("a");
-//       a.href = url;
-//       a.download = "backup.json";
-//       document.body.appendChild(a);
-//       a.click();
-//       document.body.removeChild(a);
-//       URL.revokeObjectURL(url);
-//     };
-
-//     request.onerror = function () {
-//       alert("Error exporting data.");
-//     };
-//   }
-
-//   // Import from JSON
-//   document
-//     .getElementById("importBackup")
-//     .addEventListener("change", function (event) {
-//       const file = event.target.files[0];
-//       if (file) {
-//         importDataFromJSON(file);
-//       }
-//     });
-
-//   function importDataFromJSON(file) {
-//     const reader = new FileReader();
-
-//     reader.onload = function (event) {
-//       try {
-//         const data = JSON.parse(event.target.result);
-//         const transaction = db.transaction("queries", "readwrite");
-//         const objectStore = transaction.objectStore("queries");
-
-//         data.forEach((item) => {
-//           objectStore.put(item);
-//         });
-
-//         transaction.oncomplete = function () {
-//           alert("Data imported successfully.");
-//           loadQueries();
-//         };
-
-//         transaction.onerror = function () {
-//           alert("Error importing data.");
-//         };
-//       } catch (e) {
-//         alert("Error parsing JSON file: " + e.message);
-//       }
-//     };
-
-//     reader.readAsText(file);
-//   }
-
-//   // Update Backup
-//   document
-//     .getElementById("updateBackup")
-//     .addEventListener("click", updateBackupHandler);
-
-//   async function updateBackupHandler() {
-//     const fileInput = document.getElementById("existingBackup");
-//     if (fileInput.files.length === 0) {
-//       alert("Please select a backup file to update.");
-//       return;
-//     }
-
-//     const file = fileInput.files[0];
-//     const reader = new FileReader();
-
-//     reader.onload = async function (event) {
-//       try {
-//         const existingData = JSON.parse(event.target.result);
-//         const newData = await fetchQueriesFromIndexedDB();
-//         updateBackupFile(existingData, newData);
-//       } catch (error) {
-//         alert("Error updating backup: " + error);
-//       }
-//     };
-
-//     reader.readAsText(file);
-//   }
-
-//   function updateBackupFile(existingData, newData) {
-//     const combinedData = [...existingData, ...newData];
-//     const blob = new Blob([JSON.stringify(combinedData, null, 2)], {
-//       type: "application/json",
-//     });
-//     const url = URL.createObjectURL(blob);
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = "backup.json";
-//     document.body.appendChild(a);
-//     a.click();
-//     document.body.removeChild(a);
-//     URL.revokeObjectURL(url);
-//   }
-
-//   function fetchQueriesFromIndexedDB() {
-//     return new Promise((resolve, reject) => {
-//       const transaction = db.transaction("queries", "readonly");
-//       const objectStore = transaction.objectStore("queries");
-//       const request = objectStore.getAll();
-
-//       request.onsuccess = function () {
-//         resolve(request.result);
-//       };
-
-//       request.onerror = function () {
-//         reject("Error fetching queries from IndexedDB.");
-//       };
-//     });
-//   }
 
 //   // Scroll position handling
 //   function saveScrollPosition() {
@@ -195,117 +205,7 @@ if (!admin) {
 //     }
 //   }
 
-//   // Agent management
-//   function loadAgents() {
-//     const agents = JSON.parse(localStorage.getItem("agents")) || [
-//       "Agent 1",
-//       "Agent 2",
-//       "Agent 3",
-//     ];
-//     const filterAgent = document.getElementById("filterAgent");
-//     const agentSelect = document.getElementById("agent");
-//     const removeAgentSelect = document.getElementById("removeAgentSelect");
-
-//     clearSelect(filterAgent);
-//     clearSelect(agentSelect);
-//     clearSelect(removeAgentSelect);
-
-//     addOption(filterAgent, "All", "All");
-//     addOption(agentSelect, "Choose...", "", true);
-//     addOption(removeAgentSelect, "Choose...", "", true);
-
-//     agents.forEach((agent) => {
-//       addOption(filterAgent, agent, agent);
-//       addOption(agentSelect, agent, agent);
-//       addOption(removeAgentSelect, agent, agent);
-//     });
-//   }
-
-//   function clearSelect(selectElement) {
-//     while (selectElement.options.length > 0) {
-//       selectElement.remove(0);
-//     }
-//   }
-
-//   function addOption(selectElement, text, value, selected = false) {
-//     const option = document.createElement("option");
-//     option.text = text;
-//     option.value = value;
-//     option.selected = selected;
-//     selectElement.appendChild(option);
-//   }
-
-//   function saveAgent(agent) {
-//     let agents = JSON.parse(localStorage.getItem("agents")) || [];
-//     if (!agents.includes(agent)) {
-//       agents.push(agent);
-//       localStorage.setItem("agents", JSON.stringify(agents));
-//       loadAgents();
-//     }
-//   }
-
-//   function removeAgent(agent) {
-//     let agents = JSON.parse(localStorage.getItem("agents")) || [];
-//     agents = agents.filter((existingAgent) => existingAgent !== agent);
-//     localStorage.setItem("agents", JSON.stringify(agents));
-//     loadAgents();
-//   }
-
-//   // Query handling
-//   function loadQueries() {
-//     const transaction = db.transaction("queries", "readonly");
-//     const objectStore = transaction.objectStore("queries");
-//     const request = objectStore.getAll();
-
-//     request.onsuccess = function (event) {
-//       queries = event.target.result;
-//       displayQueries(queries);
-//     };
-
-//     request.onerror = function (event) {
-//       console.error("Error fetching queries:", event.target.errorCode);
-//       alert("Error fetching queries: " + event.target.errorCode);
-//     };
-//   }
-
-//   function displayQueries(queries) {
-//     const tableBody = document.querySelector("#queryTable tbody");
-//     tableBody.innerHTML = "";
-
-//     queries.forEach((query, index) => {
-//       const row = document.createElement("tr");
-//       row.innerHTML = `
-//                 <th scope="row">${index + 1}</th>
-//                 <td>${query.agent}</td>
-//                 <td>${query.query}</td>
-//                 <td>${query.phone || ""}</td>
-//                 <td>${query.additionalInfo || ""}</td>
-//                 <td>${query.date || ""}</td>
-//                 <td>${query.time}</td>
-//                 <td>
-//                     <button class="btn btn-warning btn-sm edit-btn" data-id="${
-//                       query.id
-//                     }">Edit</button>
-//                     <button class="btn btn-danger btn-sm delete-btn" data-id="${
-//                       query.id
-//                     }">Delete</button>
-//                 </td>
-//             `;
-//       tableBody.appendChild(row);
-//     });
-
-//     if (editId === null) {
-//       scrollToElement(document.getElementById("queryTable"));
-//     }
-
-//     // Attach event listeners to new buttons
-//     document.querySelectorAll(".edit-btn").forEach((btn) => {
-//       btn.addEventListener("click", editQueryHandler);
-//     });
-//     document.querySelectorAll(".delete-btn").forEach((btn) => {
-//       btn.addEventListener("click", deleteQueryHandler);
-//     });
-//   }
+//
 
 //   // Form submission
 //   document
@@ -412,45 +312,6 @@ if (!admin) {
 //     };
 //   }
 
-//   // Filter handling
-//   document
-//     .getElementById("applyFilters")
-//     .addEventListener("click", applyFilters);
-//   document
-//     .getElementById("clearFilters")
-//     .addEventListener("click", clearFilters);
-
-//   function applyFilters() {
-//     const agent = document.getElementById("filterAgent").value;
-//     const startDate = document.getElementById("filterStartDate").value;
-//     const endDate = document.getElementById("filterEndDate").value;
-
-//     let filteredQueries = queries;
-
-//     if (agent && agent !== "All") {
-//       filteredQueries = filteredQueries.filter((q) => q.agent === agent);
-//     }
-//     if (startDate) {
-//       filteredQueries = filteredQueries.filter(
-//         (q) => new Date(q.date) >= new Date(startDate)
-//       );
-//     }
-//     if (endDate) {
-//       filteredQueries = filteredQueries.filter(
-//         (q) => new Date(q.date) <= new Date(endDate)
-//       );
-//     }
-
-//     displayQueries(filteredQueries);
-//   }
-
-//   function clearFilters() {
-//     document.getElementById("filterAgent").value = "All";
-//     document.getElementById("filterStartDate").value = "";
-//     document.getElementById("filterEndDate").value = "";
-//     displayQueries(queries);
-//   }
-
 //   // Excel download
 //   document
 //     .getElementById("downloadExcel")
@@ -477,29 +338,6 @@ if (!admin) {
 //     const workbook = XLSX.utils.book_new();
 //     XLSX.utils.book_append_sheet(workbook, worksheet, "Queries");
 //     XLSX.writeFile(workbook, `Queries_${filterText}.xlsx`);
-//   }
-
-//   // Agent management handlers
-//   document
-//     .getElementById("addAgent")
-//     .addEventListener("click", addAgentHandler);
-//   document
-//     .getElementById("removeAgent")
-//     .addEventListener("click", removeAgentHandler);
-
-//   function addAgentHandler() {
-//     const agent = document.getElementById("newAgent").value;
-//     if (agent) {
-//       saveAgent(agent);
-//       document.getElementById("newAgent").value = "";
-//     }
-//   }
-
-//   function removeAgentHandler() {
-//     const agent = document.getElementById("removeAgentSelect").value;
-//     if (agent && agent !== "Choose...") {
-//       removeAgent(agent);
-//     }
 //   }
 
 //   // Utility functions

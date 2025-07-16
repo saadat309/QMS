@@ -2,7 +2,10 @@
 
 // Handles errors by logging technical details and showing a user-friendly message
 
-export function handleError(error, userMessage = "Something went wrong. Please try again.") {
+export function handleError(
+  error,
+  userMessage = "Something went wrong. Please try again."
+) {
   // Log technical details for debugging (could be sent to server in production)
   if (error instanceof Error) {
     console.error(error.stack || error.message);
@@ -51,4 +54,74 @@ export function showModal(message, { type = "alert" } = {}) {
 
     modal.style.display = "flex";
   });
+}
+
+// ===== Agents Fetching =====
+
+export async function fetchAgents(id) {
+  try {
+    const res = await fetch("/agents/getAgents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ admin_id: id }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      return data;
+    }
+  } catch (error) {
+    handleError(error, "Server side error !!");
+  }
+}
+
+// Add agent to database
+export async function saveAgent(agentName, admin_id) {
+  try {
+    const res = await fetch("/agents/addAgent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: agentName, admin_id: admin_id }),
+    });
+
+    const result = await res.json();
+    return result;
+  } catch (err) {
+    console.error("Error saving agent:", err);
+    throw err; // allow caller to handle it
+  }
+}
+
+// Remove agent from database
+export async function removeAgent(agentName, admin_id) {
+  try {
+    const res = await fetch("/agents/removeAgent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: agentName, admin_id }),
+    });
+
+    const result = await res.json();
+    return result;
+  } catch (err) {
+    console.error("Error removing agent:", err);
+    throw err;
+  }
+}
+
+// ============= Fetching All Queries ==========
+
+export async function fetchQueries(){
+  try {
+    const res = await fetch("/queries/getQueries");
+
+    if (res.ok) {
+      const data = await res.json();
+
+      return data;
+    }
+  } catch (error) {
+    handleError(error, "Server side error !!");
+  }
 }
